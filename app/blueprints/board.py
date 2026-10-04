@@ -3,7 +3,7 @@ from flask_login import login_required
 
 from app.extensions import db
 from app.models import Plant, Pond
-from app.services.pond_lookup import drawer_batch_for, footer_pond_count, sort_ponds_string
+from app.services.pond_lookup import drawer_batch_for, footer_pond_count, sort_ponds_natural
 from app.services.rules import RuleError, assert_can_set_pond_status, latest_batch_for_pond
 
 bp = Blueprint("board", __name__, url_prefix="/board")
@@ -29,7 +29,7 @@ def floor_plan():
     ponds = []
     if active_plant:
         raw = Pond.query.filter_by(plant_id=active_plant.id).all()
-        ponds = sort_ponds_string(raw)
+        ponds = sort_ponds_natural(raw)
 
     pond_cards = []
     for pond in ponds:
@@ -44,8 +44,7 @@ def floor_plan():
         if selected is None and active_plant:
             selected = db.session.get(Pond, selected_id)
         if selected:
-            # 抽屉近班串邻号；瓦片卡上仍用本池 batch 显示峰值摘要
-            selected_batch = drawer_batch_for(selected, ponds)
+            selected_batch = drawer_batch_for(selected)
 
     footer_count = footer_pond_count(active_plant.id if active_plant else None)
 
