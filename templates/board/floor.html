@@ -99,7 +99,6 @@
           <div><dt>目标</dt><dd>{{ '%.1f'|format(selected_batch.target_temp_c) }} ℃</dd></div>
           <div><dt>峰值</dt><dd>{% if selected_batch.peak_temp_c is not none %}{{ '%.1f'|format(selected_batch.peak_temp_c) }} ℃{% else %}未记录{% endif %}</dd></div>
           <div><dt>备注</dt><dd>{{ selected_batch.notes or '—' }}</dd></div>
-          <div><dt>近班池线索</dt><dd>抽屉加载的近班备注如上（可能与瓦片池号不一致）</dd></div>
         </dl>
         {% else %}
         <p class="hint">尚无批次，无法出灰。</p>

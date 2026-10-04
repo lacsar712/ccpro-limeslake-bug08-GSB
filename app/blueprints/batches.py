@@ -5,8 +5,15 @@ from flask_login import login_required
 
 from app.extensions import db
 from app.models import Pond, SlakeBatch
+from app.services.pond_lookup import natural_sort_key
 
 bp = Blueprint("batches", __name__, url_prefix="/batches")
+
+
+def _ponds_for_select():
+    ponds = Pond.query.all()
+    ponds.sort(key=lambda p: (p.plant.name, natural_sort_key(p.code), p.id or 0))
+    return ponds
 
 
 @bp.route("/")
@@ -23,7 +30,7 @@ def list_batches():
 @bp.route("/new", methods=["GET", "POST"])
 @login_required
 def create_batch():
-    ponds = Pond.query.order_by(Pond.code).all()
+    ponds = _ponds_for_select()
     if request.method == "POST":
         pond_id = int(request.form["pond_id"])
         started_raw = request.form.get("started_at") or ""
@@ -61,7 +68,7 @@ def create_batch():
 @login_required
 def edit_batch(batch_id: int):
     batch = SlakeBatch.query.get_or_404(batch_id)
-    ponds = Pond.query.order_by(Pond.code).all()
+    ponds = _ponds_for_select()
     if request.method == "POST":
         batch.pond_id = int(request.form["pond_id"])
         started_raw = request.form.get("started_at") or ""

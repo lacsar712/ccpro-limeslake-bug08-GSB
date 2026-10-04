@@ -3,6 +3,7 @@ from flask_login import login_required
 
 from app.extensions import db
 from app.models import Plant, Pond
+from app.services.pond_lookup import natural_sort_key
 from app.services.rules import RuleError, assert_can_set_pond_status
 
 bp = Blueprint("ponds", __name__, url_prefix="/ponds")
@@ -17,7 +18,9 @@ STATUS_LABELS = {
 @bp.route("/")
 @login_required
 def list_ponds():
-    ponds = Pond.query.join(Plant).order_by(Plant.name, Pond.code).all()
+    # 厂区名走数据库序，池号在 Python 侧按自然序排（P-2 在 P-10 前）
+    ponds = Pond.query.join(Plant).all()
+    ponds.sort(key=lambda p: (p.plant.name, natural_sort_key(p.code), p.id or 0))
     plants = Plant.query.order_by(Plant.name).all()
     return render_template(
         "ponds/list.html",
